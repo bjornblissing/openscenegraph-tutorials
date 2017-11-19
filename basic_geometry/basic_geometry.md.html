@@ -1,0 +1,135 @@
+<meta charset="utf-8">
+
+(#) Basic Geometry
+
+This is a tutorial which shows how to setup your very first geometry.
+
+![Figure [quad]: This tutorial outputs a multi colored quad](basic_geometry.png)
+
+(##) Code
+
+As usual the code start by including the relevant headers
+
+<script type="preformatted">
+~~~~~
+
+#include <osgViewer/viewer>
+#include <osg/Geometry>
+~~~~~
+</script>
+
+OpenSceneGraph have a class for handling the arguments passed to an executable; the `osg::ArgumentParser`. The `argc`and `argv` parameters are passed to the constructor of this class. The created object can then be queried for parameters passed. This object can also be submitted directly into the `osgViewer::viewer` constructor. This class handles our main scene graph application and parameters can be passed to this class changing properties such as which montor to use, if the application should be run in windowed mode or in full screen mode etc...
+
+<script type="preformatted">
+~~~~~
+int main(int argc, char **argv)
+{
+  osg::ArgumentParser arguments(&argc, argv);
+  osgViewer::Viewer viewer(arguments);
+~~~~~
+</script>
+
+Then a geometry object is created. This object will hold all the data regarding the 3D-model. That is the verticies (points in 3D space that makes up the objects), the color of each vertex and the surface normal of each vertex.
+
+<script type="preformatted">
+~~~~
+osg::ref_ptr<osg::Geometry> geometry = new osg::Geometry;
+~~~~
+</script>
+
+The geometry gets populated with vertex data:
+
+<script type="preformatted">
+~~~~
+  osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array;
+  vertices->push_back(osg::Vec3(-1.0, 0.0, -1.0));
+  vertices->push_back(osg::Vec3(-1.0, 0.0,  1.0));
+  vertices->push_back(osg::Vec3( 1.0, 0.0,  1.0));
+  vertices->push_back(osg::Vec3( 1.0, 0.0, -1.0));
+  
+  geometry->setVertexArray(vertices);
+~~~~
+</script>
+
+And each vertex gets assigned a color:
+
+<script type="preformatted">
+~~~~
+  osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array;
+  colors->push_back(osg::Vec4(1.0, 0.0, 0.0, 1.0));
+  colors->push_back(osg::Vec4(0.0, 1.0, 0.0, 1.0));
+  colors->push_back(osg::Vec4(0.0, 0.0, 1.0, 1.0));
+  colors->push_back(osg::Vec4(1.0, 1.0, 1.0, 1.0));
+
+  geometry->setColorArray(colors);
+  geometry->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
+~~~~
+</script>
+
+Since the simple geometry that is created is flat there is no need for normals that are unique per vertex. Instead one normal vector is created and used for all verticies.
+
+<script type="preformatted">
+~~~~
+  osg::ref_ptr<osg::Vec3Array> normals = new osg::Vec3Array;
+  normals->push_back(osg::Vec3(0.0f, -1.0f, 0.0f));
+
+  geometry->setNormalArray(normals);
+  geometry->setNormalBinding(osg::Geometry::BIND_OVERALL);
+~~~~
+</script>
+
+The geometry is finalized by describing how the vertex points are connnected. This can be one of the following types; `GL_POINTS`, `GL_LINES`, `GL_LINE_LOOP`, `GL_LINE_STRIP`, `GL_TRIANGLES`, `GL_TRIANGLE_STRIP`, `GL_TRIANGLE_FAN`, `GL_QUADS`, `GL_QUAD_STRIP` or `GL_POLYGON`.
+
+<script type="preformatted">
+~~~~
+  geometry->addPrimitiveSet(new osg::DrawArrays(GL_QUADS, 0, 4));
+~~~~
+</script>
+
+The geometry gets connected to the viewer.
+
+<script type="preformatted">
+~~~~
+  viewer.setSceneData(geometry);
+~~~~
+</script>
+
+Then the viewer main loop can be started:
+
+<script type="preformatted">
+~~~~
+  return viewer.run();
+}
+~~~~
+</script>
+
+The viewer run function starts the main loop displaying the geometry. The geometry is scaled and centered automatically and a orbit controller is enabled by default to make the user able to rotate, zoom and translate the object on screen.
+
+(##) Frequently Asked Questions
+
+*- How do I change the background color?*
+
+The background color is controlled by the scene camera. Before every new frame is rendered the camera clears the render buffer with a set clear color. To change that color the camera object have to be retreived from the viewer object. Then the clear color can be set to the camera object.
+
+<script type="preformatted">
+~~~~
+  osg::Camera* camera = viewer.getCamera();
+  camera->setClearColor(osg::Vec4(0.0, 0.0, 0.0, 1.0));
+
+~~~~
+</script>
+
+*- Why are colors specified as with 4 values?*
+
+Colors are specified by `osg::Vec4`, where the components are red, green, blue and alfa. The values are normalized, i.e. from 0.0 to 1.0.
+
+(##) Source code:
+
+[basic_geometry.cpp](basic_geometry.cpp)
+
+-----
+
+
+[Back to index...](../index.md.html)
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="https://casual-effects.com/markdeep/latest/markdeep.min.js"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
